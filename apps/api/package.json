@@ -22,7 +22,8 @@
     "fastify-plugin": "^6.0.0",
     "pg": "^8.22.0",
     "pino": "^10.3.1",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "@breadcrumb/utils": "workspace:*"
   },
   "devDependencies": {
     "@prisma/client": "^7.8.0",

@@ -3,6 +3,7 @@ import fp from 'fastify-plugin'
 
 // This decorates `app.authenticate` for use in route preHandlers
 export const authMiddleware = fp(async (app: FastifyInstance) => {
+    // IMP : CHANGE WITH FASTIFY TYPES INSTEAD OF ANY WHEN REQUIRED. 
   app.decorate('authenticate', async (request: any, reply: any) => {
     try {
       await request.jwtVerify()

@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import { authService } from './auth.service'
 import { registerSchema, loginSchema } from './auth.schema'
+import { config } from '../../config/config'
 
 export async function authRoutes(app: FastifyInstance) {
   // POST /api/v1/auth/register
@@ -19,7 +20,7 @@ export async function authRoutes(app: FastifyInstance) {
     }
 
     const user = await authService.register(parsed.data)
-    const token = app.jwt.sign({ userId: user.id }, { expiresIn: '7d' })
+    const token = app.jwt.sign({ userId: user.id }, { expiresIn: config.JWT_EXPIRES_IN })
 
     return reply.status(201).send({
       success: true,
