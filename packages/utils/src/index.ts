@@ -12,3 +12,6 @@ export function generateUniqueSlug(name: string): string {
   const suffix = Math.random().toString(36).slice(2, 7)
   return `${base}-${suffix}`
 }
+
+export * from './slug'
+export * from './stack-trace-parser'
