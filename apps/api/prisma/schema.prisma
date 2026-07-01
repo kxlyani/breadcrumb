@@ -39,13 +39,15 @@ model ApiToken {
 }
 
 model Workspace {
-  id          String    @id @default(cuid())
-  name        String
-  slug        String    @unique
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  members     WorkspaceMember[]
+  members   WorkspaceMember[]
+  issues    Issue[]           // add this
+  tags      Tag[]             // add this
 
   @@map("workspaces")
 }
@@ -63,4 +65,115 @@ model WorkspaceMember {
 
   @@unique([userId, workspaceId])
   @@map("workspace_members")
+}
+
+model Issue {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  status      IssueStatus @default(OPEN)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  resolvedAt  DateTime?
+
+  workspaceId String
+  workspace   Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  stackTrace  StackTrace?
+  rootCause   RootCause?
+  fix         Fix?
+  notes       IssueNote[]
+  tags        IssueTag[]
+
+  @@map("issues")
+}
+
+enum IssueStatus {
+  OPEN
+  INVESTIGATING
+  RESOLVED
+}
+
+model StackTrace {
+  id              String   @id @default(cuid())
+  raw             String   // the original paste, preserved exactly
+  exceptionType   String?  // e.g. "NullPointerException"
+  exceptionMessage String? // e.g. "Cannot read property 'id' of undefined"
+  language        String?  // e.g. "javascript", "python", "java"
+  frames          Json     // array of { file, line, function } objects
+  createdAt       DateTime @default(now())
+
+  issueId         String   @unique
+  issue           Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@map("stack_traces")
+}
+
+model RootCause {
+  id          String   @id @default(cuid())
+  description String
+  identifiedAt DateTime @default(now())
+
+  issueId     String   @unique
+  issue       Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@map("root_causes")
+}
+
+model Fix {
+  id           String   @id @default(cuid())
+  description  String
+  approach     FixApproach @default(CODE_CHANGE)
+  affectedFiles String[] // file paths
+  commitRef    String?  // optional git commit hash or PR link
+  createdAt    DateTime @default(now())
+
+  issueId      String   @unique
+  issue        Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@map("fixes")
+}
+
+enum FixApproach {
+  CODE_CHANGE
+  CONFIG_CHANGE
+  DEPENDENCY_UPDATE
+  INFRASTRUCTURE
+  OTHER
+}
+
+model IssueNote {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  issueId   String
+  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@map("issue_notes")
+}
+
+model Tag {
+  id          String     @id @default(cuid())
+  name        String
+  color       String     @default("#6366f1")
+  createdAt   DateTime   @default(now())
+
+  workspaceId String
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  issues      IssueTag[]
+
+  @@unique([workspaceId, name])
+  @@map("tags")
+}
+
+model IssueTag {
+  issueId String
+  issue   Issue  @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  tagId   String
+  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([issueId, tagId])
+  @@map("issue_tags")
 }
