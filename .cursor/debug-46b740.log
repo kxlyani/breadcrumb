@@ -1,0 +1,2 @@
+{"sessionId":"46b740","location":"RegisterPage.tsx:handleSubmit","message":"register submit payload","data":{"email":"test@email.com","name":"test","nameLength":4,"passwordLength":8,"hasName":true},"timestamp":1783001251933,"hypothesisId":"A,B,C"}
+{"sessionId":"46b740","location":"auth.routes.ts:register","message":"register request received","data":{"bodyKeys":["email","password","name"],"email":"test@email.com","name":"test","nameLength":4,"passwordLength":8},"timestamp":1783001251981,"hypothesisId":"A,B,C,D"}

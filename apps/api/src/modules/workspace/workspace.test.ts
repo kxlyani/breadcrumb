@@ -15,7 +15,7 @@ describe('Workspace Routes', () => {
     const res = await supertest(app.server)
       .post('/api/v1/auth/register')
       .send({
-        email: `workspace-test-${Date.now()}@devbrain.test`,
+        email: `workspace-test-${Date.now()}@breadcrumb.test`,
         password: 'TestPassword123',
         name: 'Workspace Tester',
       })
@@ -73,7 +73,7 @@ describe('Workspace Routes', () => {
     const otherUser = await supertest(app.server)
       .post('/api/v1/auth/register')
       .send({
-        email: `outsider-${Date.now()}@devbrain.test`,
+        email: `outsider-${Date.now()}@breadcrumb.test`,
         password: 'TestPassword123',
       })
 

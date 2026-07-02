@@ -20,7 +20,7 @@ describe('Issue Routes', () => {
     const userRes = await supertest(app.server)
       .post('/api/v1/auth/register')
       .send({
-        email: `issues-test-${Date.now()}@devbrain.test`,
+        email: `issues-test-${Date.now()}@breadcrumb.test`,
         password: 'TestPassword123',
       })
     authToken = userRes.body.data.token
