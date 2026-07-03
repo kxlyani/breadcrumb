@@ -39,4 +39,6 @@ function createClient(baseURL: string): AxiosInstance {
   return client
 }
 
-export const httpClient = createClient('/api/v1')
+export const httpClient = createClient(
+  import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/v1` : '/api/v1'
+)
