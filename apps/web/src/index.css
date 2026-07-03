@@ -1,32 +1,71 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #0f1117;
-  --color-surface: #1a1d27;
-  --color-surface-raised: #21253a;
-  --color-border: #2a2f45;
-  --color-accent: #6366f1;
-  --color-accent-hover: #5558e8;
-  --color-text: #e2e8f0;
-  --color-text-muted: #64748b;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
+  --color-bg:             #0e0f0d;
+  --color-surface:        #141714;
+  --color-surface-raised: #1a1e19;
+  --color-surface-hover:  #1f241e;
+  --color-border:         #1f221e;
+  --color-border-strong:  #2a2f28;
+
+  --color-accent:         #D5957E;
+  --color-accent-dim:     rgba(213,149,126,0.10);
+  --color-accent-glow:    rgba(213,149,126,0.06);
+  --color-accent-border:  rgba(213,149,126,0.25);
+
+  --color-text:           #ede8e3;
+  --color-text-secondary: #a8a89e;
+  --color-text-muted:     #4f554d;
+
+  --color-mono-blue:      #7ab3c8;
+  --color-mono-green:     #89b892;
+  --color-mono-red:       #d9876e;
+
+  --color-open-bg:        rgba(213,149,126,0.12);
+  --color-open-text:      #D5957E;
+  --color-inv-bg:         rgba(180,160,80,0.10);
+  --color-inv-text:       #c4a94a;
+  --color-res-bg:         rgba(100,170,110,0.10);
+  --color-res-text:       #6daa7a;
+
   --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
-* {
-  box-sizing: border-box;
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background-color: #0f1117;
-  color: #e2e8f0;
+  background: #0e0f0d;
+  color: #ede8e3;
   font-family: 'Inter', system-ui, sans-serif;
-  margin: 0;
   -webkit-font-smoothing: antialiased;
+  font-size: 13px;
 }
 
-#root {
-  min-height: 100dvh;
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2f28; border-radius: 3px; }
+
+::placeholder { color: #4f554d; }
+
+input, textarea, select {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  color: #a8a89e;
+  background: #141714;
+  border: 1px solid #2a2f28;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.12s;
+}
+
+input:focus, textarea:focus {
+  border-color: rgba(213,149,126,0.4);
+  color: #ede8e3;
 }

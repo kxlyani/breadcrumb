@@ -23,6 +23,9 @@ export const useAuthStore = create<AuthState>()(
         set({ token: null, user: null })
       },
     }),
-    { name: 'breadcrumb-auth' }
+    {
+      name: 'breadcrumb-auth',
+      partialize: (state) => ({ token: state.token, user: state.user }),
+    }
   )
 )

@@ -1,62 +1,120 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate, useParams } from 'react-router-dom'
+import {
+  LayoutDashboard,
+  Flag,
+  BookOpen,
+  GitBranch,
+  Sparkles,
+  LogOut,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
 import { useWorkspaceStore } from '@/store/workspace.store'
 
+function NavItem({ to, icon: Icon, label }: { to: string; icon: LucideIcon; label: string }) {
+  return (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `mb-[1px] flex items-center gap-2.5 rounded-md px-2 py-[6px] text-[12.5px] transition-all ${
+          isActive
+            ? 'bg-[rgba(213,149,126,0.10)] text-[#D5957E]'
+            : 'text-[#4f554d] hover:bg-[#1f241e] hover:text-[#a8a89e]'
+        }`
+      }
+    >
+      <Icon className="h-[15px] w-[15px] shrink-0" aria-hidden />
+      <span className="flex-1">{label}</span>
+    </NavLink>
+  )
+}
+
 export function AppLayout() {
-  const { user, clearAuth } = useAuthStore()
+  const { clearAuth } = useAuthStore()
   const { activeWorkspace } = useWorkspaceStore()
   const navigate = useNavigate()
+  const params = useParams()
 
-  const handleLogout = () => {
-    clearAuth()
-    navigate('/login')
-  }
-
-  const navLink = ({ isActive }: { isActive: boolean }) =>
-    `flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
-      isActive
-        ? 'bg-indigo-500/10 text-indigo-400'
-        : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
-    }`
+  const workspaceId = params.workspaceId ?? activeWorkspace?.id
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#0f1117]">
-      {/* Sidebar */}
-      <aside className="flex w-56 flex-col border-r border-white/5 bg-[#1a1d27] p-4">
-        <div className="mb-6 px-3">
-          <span className="text-base font-semibold text-slate-100">Breadcrumb</span>
-          {activeWorkspace && (
-            <p className="mt-0.5 truncate text-xs text-slate-500">{activeWorkspace.name}</p>
-          )}
+    <div className="flex h-screen overflow-hidden bg-[#0e0f0d]">
+      <aside className="flex w-[196px] min-w-[196px] flex-col border-r border-[#1f221e] bg-[#141714]">
+        <div className="border-b border-[#1f221e] px-4 py-[18px]">
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-[3px]">
+              <div className="h-[7px] w-[7px] rounded-full bg-[#D5957E]" />
+              <div className="h-[4px] w-[4px] rounded-full bg-[#D5957E] opacity-50" />
+              <div className="h-[2.5px] w-[2.5px] rounded-full bg-[#D5957E] opacity-25" />
+            </div>
+            <span className="text-[14px] font-semibold tracking-tight text-[#ede8e3]">
+              bread<span className="text-[#D5957E]">crumb</span>
+            </span>
+          </div>
         </div>
 
-        <nav className="flex flex-col gap-1">
-          <NavLink to="/dashboard" className={navLink}>Dashboard</NavLink>
-          {activeWorkspace && (
+        <nav className="flex-1 overflow-y-auto px-2 py-3">
+          <div className="px-2 pb-1.5 pt-2 text-[9.5px] font-semibold uppercase tracking-[0.1em] text-[#4f554d]">
+            Overview
+          </div>
+          <NavItem to="/dashboard" icon={LayoutDashboard} label="Dashboard" />
+
+          {workspaceId && (
             <>
-              <NavLink to={`/workspaces/${activeWorkspace.id}/issues`} className={navLink}>
-                Issues
-              </NavLink>
+              <div className="px-2 pb-1.5 pt-3 text-[9.5px] font-semibold uppercase tracking-[0.1em] text-[#4f554d]">
+                Workspace
+              </div>
+              <NavItem to={`/workspaces/${workspaceId}/issues`} icon={Flag} label="Issues" />
+              <NavItem
+                to={`/workspaces/${workspaceId}/knowledge`}
+                icon={BookOpen}
+                label="Knowledge base"
+              />
+              <NavItem
+                to={`/workspaces/${workspaceId}/repos`}
+                icon={GitBranch}
+                label="Repositories"
+              />
             </>
           )}
-          <NavLink to="/workspaces" className={navLink}>Workspaces</NavLink>
+
+          <div className="px-2 pb-1.5 pt-3 text-[9.5px] font-semibold uppercase tracking-[0.1em] text-[#4f554d]">
+            Tools
+          </div>
+          <NavItem to="/assistant" icon={Sparkles} label="AI assistant" />
         </nav>
 
-        <div className="mt-auto border-t border-white/5 pt-4">
-          <div className="mb-2 px-3">
-            <p className="text-xs text-slate-500 truncate">{user?.email}</p>
-          </div>
+        <div className="border-t border-[#1f221e] px-3 py-3">
+          {activeWorkspace && (
+            <button
+              type="button"
+              onClick={() => navigate('/dashboard')}
+              className="mb-2 w-full cursor-pointer rounded-md border border-[#2a2f28] bg-[#1a1e19] px-3 py-2 text-left transition-colors hover:border-[#D5957E]/30"
+            >
+              <div className="mb-[2px] text-[9.5px] uppercase tracking-[0.05em] text-[#4f554d]">
+                Workspace
+              </div>
+              <div className="truncate text-[12px] font-medium text-[#a8a89e]">
+                {activeWorkspace.name}
+              </div>
+            </button>
+          )}
           <button
-            onClick={handleLogout}
-            className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-400 hover:bg-white/5 hover:text-slate-200 transition-colors"
+            type="button"
+            onClick={() => {
+              clearAuth()
+              navigate('/login')
+            }}
+            aria-label="Log out"
+            className="flex w-full items-center gap-2 rounded-md px-2 py-[6px] text-left text-[12px] text-[#4f554d] transition-colors hover:bg-[#1f241e] hover:text-[#a8a89e]"
           >
+            <LogOut className="h-3.5 w-3.5" aria-hidden />
             Log out
           </button>
         </div>
       </aside>
 
-      {/* Main */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex flex-1 flex-col overflow-hidden">
         <Outlet />
       </main>
     </div>

@@ -1,23 +1,15 @@
-type BadgeVariant = 'open' | 'investigating' | 'resolved' | 'default'
-
-const STATUS_VARIANTS: Record<string, BadgeVariant> = {
-  OPEN: 'open',
-  INVESTIGATING: 'investigating',
-  RESOLVED: 'resolved',
-}
-
-const STYLES: Record<BadgeVariant, string> = {
-  open: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  investigating: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-  resolved: 'bg-green-500/10 text-green-400 border-green-500/20',
-  default: 'bg-white/5 text-slate-400 border-white/10',
+const STATUS_STYLES: Record<string, string> = {
+  OPEN:          'bg-[rgba(213,149,126,0.12)] text-[#D5957E]',
+  INVESTIGATING: 'bg-[rgba(180,160,80,0.10)] text-[#c4a94a]',
+  RESOLVED:      'bg-[rgba(100,170,110,0.10)] text-[#6daa7a]',
 }
 
 export function StatusBadge({ status }: { status: string }) {
-  const variant = STATUS_VARIANTS[status] ?? 'default'
+  const styles = STATUS_STYLES[status] ?? 'bg-[#1a1e19] text-[#4f554d]'
+  const label = status.charAt(0) + status.slice(1).toLowerCase()
   return (
-    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${STYLES[variant]}`}>
-      {status.charAt(0) + status.slice(1).toLowerCase()}
+    <span className={`inline-flex items-center rounded px-[7px] py-[2px] text-[10px] font-medium ${styles}`}>
+      {label}
     </span>
   )
 }

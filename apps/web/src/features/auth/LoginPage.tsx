@@ -6,12 +6,12 @@ import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 
 export function LoginPage() {
-  const [email, setEmail] = useState('')
+  const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const { setAuth } = useAuthStore()
-  const navigate = useNavigate()
+  const [error, setError]       = useState('')
+  const [loading, setLoading]   = useState(false)
+  const { setAuth }             = useAuthStore()
+  const navigate                = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -22,34 +22,65 @@ export function LoginPage() {
       setAuth(token, user)
       navigate('/dashboard')
     } catch (err: any) {
-      setError(err.response?.data?.error?.message ?? 'Login failed')
+      setError(err.response?.data?.error?.message ?? 'Invalid credentials')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0f1117] p-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-slate-100">Breadcrumb</h1>
-          <p className="mt-1 text-sm text-slate-500">Sign in to your account</p>
+    <div className="flex min-h-screen items-center justify-center bg-[#0e0f0d] p-4">
+      <div className="w-full max-w-[360px]">
+
+        {/* Logo */}
+        <div className="mb-8 flex flex-col items-center gap-3">
+          <div className="flex items-center gap-[4px]">
+            <div className="w-[9px] h-[9px] rounded-full bg-[#D5957E]" />
+            <div className="w-[5px] h-[5px] rounded-full bg-[#D5957E] opacity-50" />
+            <div className="w-[3px]  h-[3px]  rounded-full bg-[#D5957E] opacity-25" />
+          </div>
+          <div className="text-[22px] font-semibold tracking-tight text-[#ede8e3]">
+            bread<span className="text-[#D5957E]">crumb</span>
+          </div>
+          <p className="text-[12px] text-[#4f554d]">Sign in to continue</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 rounded-xl border border-white/10 bg-[#1a1d27] p-6">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4 rounded-lg border border-[#1f221e] bg-[#141714] p-6"
+        >
           {error && (
-            <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-sm text-red-400">
+            <div className="rounded-md bg-[rgba(217,135,110,0.08)] border border-[rgba(217,135,110,0.2)] px-3 py-2 text-[12px] text-[#d9876e]">
               {error}
             </div>
           )}
-          <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />
-          <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-          <Button type="submit" loading={loading} className="mt-2 w-full">Sign in</Button>
+          <Input
+            label="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            required
+            autoFocus
+          />
+          <Input
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            required
+          />
+          <Button type="submit" loading={loading} className="mt-1 w-full justify-center">
+            Sign in
+          </Button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-slate-500">
+        <p className="mt-4 text-center text-[12px] text-[#4f554d]">
           No account?{' '}
-          <Link to="/register" className="text-indigo-400 hover:text-indigo-300">Register</Link>
+          <Link to="/register" className="text-[#D5957E] hover:opacity-80 transition-opacity">
+            Register
+          </Link>
         </p>
       </div>
     </div>
