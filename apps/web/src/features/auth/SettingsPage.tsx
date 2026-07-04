@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
+import { httpClient } from '@breadcrumb/api-client'
 
 export function SettingsPage() {
   const [token, setToken]     = useState<string | null>(null)
@@ -9,13 +10,13 @@ export function SettingsPage() {
   const generateToken = async () => {
     setLoading(true)
     try {
-      const storedToken = localStorage.getItem('devbrain_token')
-      const res = await fetch('/api/v1/auth/tokens', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${storedToken}` },
-      })
-      const data = await res.json()
-      setToken(data.data.token)
+      const res = await httpClient.post<{
+        success: true
+        data: { token: string; note: string }
+      }>('/auth/tokens')
+      setToken(res.data.data.token)
+    } catch (err: any) {
+      console.error('Failed to generate token:', err.message)
     } finally {
       setLoading(false)
     }
@@ -38,7 +39,6 @@ export function SettingsPage() {
           Manage your account and API access.
         </p>
 
-        {/* API Tokens section */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-4">
             <span className="text-[10.5px] font-semibold uppercase tracking-[0.09em] text-[#4f554d]">
@@ -66,7 +66,7 @@ export function SettingsPage() {
               </div>
               <div className="mt-4 rounded-md bg-[#141714] border border-[#2a2f28] p-3">
                 <p className="text-[11px] text-[#4f554d] font-mono mb-1">Run in your terminal:</p>
-                <code className="text-[11px] text-[#a8a89e] font-mono">
+                <code className="text-[11px] text-[#a8a89e] font-mono break-all">
                   breadcrumb login --token {token}
                 </code>
               </div>
