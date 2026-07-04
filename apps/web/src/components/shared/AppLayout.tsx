@@ -6,6 +6,7 @@ import {
   GitBranch,
   Sparkles,
   LogOut,
+  Settings,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
@@ -82,6 +83,7 @@ export function AppLayout() {
             Tools
           </div>
           <NavItem to="/assistant" icon={Sparkles} label="AI assistant" />
+          <NavItem to="/settings" icon={Settings} label="Settings" />
         </nav>
 
         <div className="border-t border-[#1f221e] px-3 py-3">

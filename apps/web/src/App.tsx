@@ -10,6 +10,7 @@ import { NewIssuePage } from '@/features/issues/NewIssuePage'
 import { KnowledgePage } from '@/features/workspace/KnowledgePage'
 import { ReposPage } from '@/features/workspace/ReposPage'
 import { AssistantPage } from '@/features/assistant/AssistantPage'
+import { SettingsPage } from './features/auth/SettingsPage'
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="/workspaces/:workspaceId/knowledge" element={<KnowledgePage />} />
           <Route path="/workspaces/:workspaceId/repos" element={<ReposPage />} />
           <Route path="/assistant" element={<AssistantPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
