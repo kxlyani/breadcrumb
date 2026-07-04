@@ -12,6 +12,7 @@ program
   .name('breadcrumb')
   .description('Capture and search your debugging history')
   .version('0.1.0')
+  .enablePositionalOptions(true)   
 
 program.addCommand(loginCommand)
 program.addCommand(logoutCommand)

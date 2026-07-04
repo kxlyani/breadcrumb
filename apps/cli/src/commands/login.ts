@@ -7,7 +7,7 @@ import { createApiClient } from '../lib/api'
 export const loginCommand = new Command('login')
   .description('Connect the CLI to your Breadcrumb account')
   .requiredOption('--token <token>', 'Your API token from Breadcrumb settings')
-  .option('--api-url <url>', 'Breadcrumb API URL', 'breadcrumb-production-484d.up.railway.app')
+  .option('--api-url <url>', 'Breadcrumb API URL', 'https://breadcrumb-production-484d.up.railway.app')
   .action(async (opts) => {
     const spinner = ora('Verifying token…').start()
 

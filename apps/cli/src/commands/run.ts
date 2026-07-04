@@ -1,4 +1,5 @@
 import { spawn } from 'child_process'
+import * as readline from 'readline'
 import chalk from 'chalk'
 import { Command } from 'commander'
 import ora from 'ora'
@@ -6,125 +7,113 @@ import { requireConfig } from '../lib/config'
 import { createApiClient } from '../lib/api'
 import { extractError } from '../lib/parser'
 
+function askQuestion(question: string): Promise<string> {
+  return new Promise((resolve) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+      terminal: true,
+    })
+    rl.question(question, (answer) => {
+      rl.close()
+      resolve(answer.trim())
+    })
+  })
+}
+
 export const runCommand = new Command('run')
   .description('Run a command and capture failures automatically')
   .argument('<command...>', 'Command to run')
   .option('-w, --workspace <id>', 'Override workspace ID')
+  .allowUnknownOption(true)
+  .passThroughOptions(true)
   .action(async (args: string[], opts) => {
     const config = requireConfig()
     if (opts.workspace) config.workspaceId = opts.workspace
 
-    const [cmd, ...cmdArgs] = args
     const fullCommand = args.join(' ')
-
     console.log(chalk.dim(`\n  Running: ${fullCommand}\n`))
 
-    // Collect output while streaming it live
     let outputBuffer = ''
 
-    const child = spawn(cmd, cmdArgs, {
-      stdio: ['inherit', 'pipe', 'pipe'],
-      shell: true,
-    })
+    await new Promise<void>((resolve) => {
+      const child = spawn(fullCommand, [], {
+        shell: 'cmd.exe',
+        stdio: ['inherit', 'pipe', 'pipe'],
+      })
 
-    // Stream stdout live AND collect it
-    child.stdout?.on('data', (data: Buffer) => {
-      const text = data.toString()
-      process.stdout.write(text)
-      outputBuffer += text
-    })
+      child.stdout?.on('data', (data: Buffer) => {
+        const text = data.toString()
+        process.stdout.write(text)
+        outputBuffer += text
+      })
 
-    // Stream stderr live AND collect it
-    child.stderr?.on('data', (data: Buffer) => {
-      const text = data.toString()
-      process.stderr.write(text)
-      outputBuffer += text
-    })
+      child.stderr?.on('data', (data: Buffer) => {
+        const text = data.toString()
+        process.stderr.write(text)
+        outputBuffer += text
+      })
 
-    child.on('close', async (code) => {
-      // Command succeeded — do nothing
-      if (code === 0) {
-        console.log(chalk.dim(`\n  ✓ Finished successfully\n`))
-        return
-      }
+      child.on('close', async (code) => {
+        if (code === 0) {
+          console.log(chalk.dim(`\n  ✓ Finished successfully\n`))
+          resolve()
+          return
+        }
 
-      // Command failed
-      console.log()
-      console.log(
-        `  ${chalk.red('❌')} ${chalk.bold(`Command failed`)} ${chalk.dim(`(exit code ${code})`)}`
-      )
-      console.log()
-
-      const extracted = extractError(outputBuffer, fullCommand)
-
-      // Show what we extracted
-      console.log(`  ${chalk.dim('Detected:')} ${chalk.yellow(extracted.title)}`)
-      console.log()
-
-      // Ask what to do
-      const { prompt } = await import('enquirer') as any
-
-      let action: string
-      try {
-        const response = await prompt({
-          type: 'select',
-          name: 'action',
-          message: 'Save to Breadcrumb?',
-          choices: [
-            { name: 'save',  message: `${chalk.green('Yes')}  — save with detected title` },
-            { name: 'edit',  message: `${chalk.blue('Edit')} — change the title first` },
-            { name: 'skip',  message: `${chalk.dim('Skip')} — don\'t save` },
-          ],
-        })
-        action = response.action
-      } catch {
-        // User hit Ctrl+C on the prompt
-        console.log(chalk.dim('\n  Skipped.\n'))
-        process.exit(code ?? 1)
-      }
-
-      if (action === 'skip') {
-        console.log(chalk.dim('\n  Skipped.\n'))
-        process.exit(code ?? 1)
-      }
-
-      let title = extracted.title
-
-      if (action === 'edit') {
-        const { prompt: prompt2 } = await import('enquirer') as any
-        const response = await prompt2({
-          type: 'input',
-          name: 'title',
-          message: 'Issue title',
-          initial: extracted.title,
-        })
-        title = response.title
-      }
-
-      // Save the issue
-      const spinner = ora('Saving issue…').start()
-      try {
-        const api = createApiClient(config)
-        const issue = await api.createIssue({
-          title,
-          description: `Captured from CLI command: \`${fullCommand}\``,
-          stackTrace: extracted.stackTrace ?? undefined,
-        })
-
-        spinner.succeed('Issue saved')
         console.log()
         console.log(
-          `  ${chalk.green('✓')} ${chalk.bold(issue.title)}`
-        )
-        console.log(
-          chalk.dim(`  ${config.apiUrl.replace('api.', '')}/workspaces/${config.workspaceId}/issues/${issue.id}`)
+          `  ${chalk.red('❌')} ${chalk.bold('Command failed')} ${chalk.dim(`(exit code ${code})`)}`
         )
         console.log()
-      } catch (err: any) {
-        spinner.fail('Failed to save issue')
-        console.error(chalk.red(`  ${err.message}\n`))
-      }
 
-      process.exit(code ?? 1)
+        const extracted = extractError(outputBuffer, fullCommand)
+        console.log(`  ${chalk.dim('Detected:')} ${chalk.yellow(extracted.title)}`)
+        console.log()
+
+        // Simple text prompt — works reliably on Windows
+        console.log(`  ${chalk.dim('Save to Breadcrumb?')}`)
+        console.log(`  ${chalk.green('[y]')} Yes   ${chalk.blue('[e]')} Edit title   ${chalk.dim('[n]')} Skip`)
+        console.log()
+
+        const answer = await askQuestion('  Your choice: ')
+        const choice = answer.toLowerCase()
+
+        if (choice === 'n' || choice === '') {
+          console.log(chalk.dim('\n  Skipped.\n'))
+          resolve()
+          process.exit(code ?? 1)
+          return
+        }
+
+        let title = extracted.title
+
+        if (choice === 'e') {
+          console.log()
+          const edited = await askQuestion(`  Title (Enter to keep): `)
+          if (edited.trim()) title = edited.trim()
+        }
+
+        const spinner = ora('Saving issue…').start()
+        try {
+          const api = createApiClient(config)
+          const issue = await api.createIssue({
+            title,
+            description: `Captured from CLI command: \`${fullCommand}\``,
+            stackTrace: extracted.stackTrace ?? undefined,
+          })
+          spinner.succeed('Issue saved')
+          console.log()
+          console.log(`  ${chalk.green('✓')} ${chalk.bold(issue.title)}`)
+          console.log(chalk.dim(`  View at your Breadcrumb dashboard → Issues`))
+          console.log()
+        } catch (err: any) {
+          spinner.fail('Failed to save issue')
+          console.error(chalk.red(`  ${err.message}\n`))
+        }
+
+        resolve()
+        process.exit(code ?? 1)
+      })
     })
   })
